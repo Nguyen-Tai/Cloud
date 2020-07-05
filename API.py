@@ -42,14 +42,14 @@ def getNextFromCurrent():
     else:
         data = db.child('DHT22').order_by_child("timestamp").get().val()
         print(len(data))
-    current_temperature, next_temperature = utils.nextTemperature(data)
-    return jsonify({'current':current_temperature ,"next":next_temperature})
+    A,B,C,LastTemperature,LastHumidity = utils.nextTemperature(data)
+    next_temperature = A*LastTemperature + B*LastHumidity+ C
+    return jsonify({'current':LastTemperature ,"next":round(next_temperature,2)})
 
 
 """Trả về nhiệt độ dự đoán tiếp theo dựa trên nhiệt độ đưa vào bởi người dùng """
-@app.route('/iot/<float:temperature>',methods=['GET'])
-def getNextFrom(temperature):
-
+@app.route('/iot/<float:temperature>/<float:humidity>',methods=['GET'])
+def getNextFrom(temperature,humidity):
     print(config.keyGet)
     if config.keyGet != None:
         data = db.child('DHT22').order_by_child("timestamp").start_at(config.keyGet).get().val()
@@ -58,13 +58,14 @@ def getNextFrom(temperature):
         data = db.child('DHT22').order_by_child("timestamp").get().val()
         print(len(data))
    
-    current_temperature, next_temperature = utils.nextTemperature(data)
-    return jsonify({'next':next_temperature})
+    A,B,C,LastTemperature,LastHumidity = utils.nextTemperature(data)
+    next_temperature = A*temperature + B*humidity+ C
+    return jsonify({'next':round(next_temperature,2)})
 
 
 """Trả về nhiệt độ dự đoán sau 60' dựa trên nhiệt độ hiện tại"""
 @app.route('/iot/after60',methods=['GET'])
-def getAfter():
+def getAfterFromCurrent():
 
     print(config.keyGet)
     if config.keyGet != None:
@@ -73,9 +74,29 @@ def getAfter():
     else:
         data = db.child('DHT22').order_by_child("timestamp").get().val()
         print(len(data))
-    current_temperature, next_temperature = utils.TemperatureAfterXSeconds(data)
+    A,B,C,LastTemperature,LastHumidity = utils.TemperatureAfterXSeconds(data)
+
+    next_temperature = A*LastTemperature + B*LastHumidity + C 
+
+    return jsonify({'current':LastTemperature ,"next":round(next_temperature,2)})
+
+
+"""Trả về nhiệt độ dự đoán sau 60' dựa trên nhiệt độ hiện tại"""
+@app.route('/iot/after60/<float:temperature>/<float:humidity>',methods=['GET'])
+def getAfterFrom(temperature,humidity):
+
+    print(config.keyGet)
+    if config.keyGet != None:
+        data = db.child('DHT22').order_by_child("timestamp").start_at(config.keyGet).get().val()
+        print(len(data))
+    else:
+        data = db.child('DHT22').order_by_child("timestamp").get().val()
+        print(len(data))
+    A,B,C,LastTemperature,LastHumidity = utils.TemperatureAfterXSeconds(data)
+
+    next_temperature = A*temperature + B*humidity + C 
     # A=B=1
-    return jsonify({'current':current_temperature ,"next":next_temperature})
+    return jsonify({"next":round(next_temperature,2)})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=80)

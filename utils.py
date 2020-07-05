@@ -38,35 +38,20 @@ def saveData():
    newHumidity.clear()
 
 def nextTemperature(newData):
-   # dt_list=[value["Temperature"] for key,value in data.items()]
-   # size_train = int(len(dt_list)*0.8)
-   # dt_train = dt_list[:size_train]
-   # df_test  = df[size_train:]
    convertNewData(newData)
 
    saveData()
    dt_modelTemperatureCurrent = Temperature[:-1]  # Loại phần tử cuối
    dt_modelTemperatureNext = Temperature[1:] # Loại phần tử đầu
    dt_modelHumidityCurrent = Humidity[:-1] # Loại phần tử cuối
-   # x = np.reshape(dt_modelCurrent,(-1,1))
-
-   # slope,intercept,r,p,stderr = stats.linregress(
-   # dt_modelCurrent,
-   # dt_modelNext
-   # ) 
-   # print(intercept,slope)
 
    x = np.column_stack((dt_modelTemperatureCurrent,dt_modelHumidityCurrent))
 
    regr = linear_model.LinearRegression()
    regr.fit(x,dt_modelTemperatureNext)
 
-   next_temperature = regr.coef_[0]*Temperature[-1]   + regr.coef_[1]* Humidity[-1] + regr.intercept_
-   
-   print('Intercept: \n', regr.intercept_)
-   print('Coefficients: \n', regr.coef_)
+   return regr.coef_[0], regr.coef_[1], regr.intercept_,Temperature[-1],Humidity[-1]
 
-   return Temperature[-1],round(next_temperature,2)
 
 def getListValueAfter(List1,List2,ListAfter1,ListAfter2,startAt):  # Data cần xử lý , maxTimestamp
    Length = len(Timestamp)
@@ -105,38 +90,15 @@ def BinarySearch(index,planIndex,TimeAfter,List,Length):  # Tìm value từ vị
 def TemperatureAfterXSeconds(newData):
    convertNewData(newData)
    saveData()
-   limit = getListValueAfter(Temperature,Humidity,TemperatureAfter,HumidityAfter,config.startAt) #+ len(Temperature) 
+   limit = getListValueAfter(Temperature,Humidity,TemperatureAfter,HumidityAfter,config.startAt)
    config.startAt = limit
    dt_modelTemperatureCurrent = Temperature[:limit]
    dt_temperatureAfter = TemperatureAfter
    dt_modelHumidityCurrent = Humidity[:limit]
-
-   # print(len(dt_temperatureAfter),"   ",len(dt_humidityAfter))
-   # regr.fit([np.reshape(dt_temperatureAfter, (-1, 2)),np.reshape(dt_humidityAfter, (-1, 2))], dt_temperature)
-
-   # print('Intercept: \n', regr.intercept_)
-   # print('Coefficients: \n', regr.coef_)
-
-   # np.reshape(A, (-1, 2))
 
    x = np.column_stack((dt_modelTemperatureCurrent,dt_modelHumidityCurrent))
 
    regr = linear_model.LinearRegression()
    regr.fit(x,dt_temperatureAfter)
 
-   next_temperature = regr.coef_[0]*Temperature[-1]   + regr.coef_[1]* Humidity[-1] + regr.intercept_
-   
-   print('Intercept: \n', regr.intercept_)
-   print('Coefficients: \n', regr.coef_)
-
-   return Temperature[-1],round(next_temperature,2)
-
-   # slope,intercept,r,p,stderr = stats.linregress(
-   # dt_temperature,
-   # dt_temperatureAfter
-   # ) 
-  # y= Ãx+B
-  #  print(slope)#A
-  #  print(intercept)#B
-  #  print(stderr)#sai số 
-   # return round(slope,3),round(intercept,3),Temperature[-1]
+   return regr.coef_[0], regr.coef_[1], regr.intercept_,Temperature[-1],Humidity[-1]
