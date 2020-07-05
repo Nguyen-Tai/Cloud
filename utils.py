@@ -2,6 +2,8 @@
 from scipy import stats 
 import time
 import config
+from sklearn import linear_model
+import numpy as np
 
 minutes = 60
 Timestamp = []
@@ -52,7 +54,7 @@ def nextTemperature(newData):
    ) 
    return round(slope,3),round(intercept,3),Temperature[-1]
 
-def getListValueAfter(List,ListAfter,startAt):  # Data cần xử lý , maxTimestamp
+def getListValueAfter(List1,List2,ListAfter1,ListAfter2,startAt):  # Data cần xử lý , maxTimestamp
    Length = len(Timestamp)
    for index, value in enumerate(Timestamp):
       if index < startAt:
@@ -61,7 +63,8 @@ def getListValueAfter(List,ListAfter,startAt):  # Data cần xử lý , maxTimes
       TimeAfter = value + seconds
       if TimeAfter > Timestamp[-1]: 
          return index     # trả về index max có thể tìm được after
-      ListAfter.append(BinarySearch(index,planIndex,TimeAfter,List,Length-1))
+      ListAfter1.append(BinarySearch(index,planIndex,TimeAfter,List1,Length-1))
+      ListAfter2.append(BinarySearch(index,planIndex,TimeAfter,List2,Length-1))
 
 
 def BinarySearch(index,planIndex,TimeAfter,List,Length):  # Tìm value từ vị trí index đến planIndex
@@ -88,10 +91,20 @@ def BinarySearch(index,planIndex,TimeAfter,List,Length):  # Tìm value từ vị
 def TemperatureAfterXSeconds(newData):
    convertNewData(newData)
    saveData()
-   limit = getListValueAfter(Temperature,TemperatureAfter,config.startAt) #+ len(Temperature) 
+   limit = getListValueAfter(Temperature,Humidity,TemperatureAfter,HumidityAfter,config.startAt) #+ len(Temperature) 
    config.startAt = limit
    dt_temperature = Temperature[:limit]
    dt_temperatureAfter = TemperatureAfter
+   dt_humidityAfter = HumidityAfter
+   # print(len(dt_temperatureAfter),"   ",len(dt_humidityAfter))
+   # regr = linear_model.LinearRegression()
+   # regr.fit([np.reshape(dt_temperatureAfter, (-1, 2)),np.reshape(dt_humidityAfter, (-1, 2))], dt_temperature)
+
+   # print('Intercept: \n', regr.intercept_)
+   # print('Coefficients: \n', regr.coef_)
+
+   # np.reshape(A, (-1, 2))
+
 
    slope,intercept,r,p,stderr = stats.linregress(
    dt_temperature,
