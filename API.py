@@ -42,30 +42,27 @@ def getNextFromCurrent():
     else:
         data = db.child('DHT22').order_by_child("timestamp").get().val()
         print(len(data))
-
-    A,B,current_temperature = utils.nextTemperature(data)
-    next_temp = round(A*current_temperature + B,1)
-    return jsonify({'current':current_temperature ,"next":next_temp})
+    current_temperature, next_temperature = utils.nextTemperature(data)
+    return jsonify({'current':current_temperature ,"next":next_temperature})
 
 
 """Trả về nhiệt độ dự đoán tiếp theo dựa trên nhiệt độ đưa vào bởi người dùng """
 @app.route('/iot/<float:temperature>',methods=['GET'])
-def getNext(temperature):
+def getNextFrom(temperature):
 
     print(config.keyGet)
     if config.keyGet != None:
         data = db.child('DHT22').order_by_child("timestamp").start_at(config.keyGet).get().val()
-        print('ít',len(data))
+        print(len(data))
     else:
         data = db.child('DHT22').order_by_child("timestamp").get().val()
-        print("all")
+        print(len(data))
    
-    A,B,current_temperature = utils.nextTemperature(data)
-    next_temp = round(A*temperature + B,1)
-    return jsonify({'next':next_temp})
+    current_temperature, next_temperature = utils.nextTemperature(data)
+    return jsonify({'next':next_temperature})
 
 
-"""Trả về nhiệt độ dự đoán tiếp theo dựa trên nhiệt độ hiện tại"""
+"""Trả về nhiệt độ dự đoán sau 60' dựa trên nhiệt độ hiện tại"""
 @app.route('/iot/after60',methods=['GET'])
 def getAfter():
 
@@ -76,11 +73,9 @@ def getAfter():
     else:
         data = db.child('DHT22').order_by_child("timestamp").get().val()
         print(len(data))
-    A,B,current_temperature = utils.TemperatureAfterXSeconds(data)
+    current_temperature, next_temperature = utils.TemperatureAfterXSeconds(data)
     # A=B=1
-    next_temp = round(A*current_temperature + B,1)
-    return jsonify({'current':current_temperature ,"next":next_temp})
-
+    return jsonify({'current':current_temperature ,"next":next_temperature})
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0",port=80)
