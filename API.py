@@ -17,8 +17,10 @@ http = urllib3.PoolManager()
 """Trả về nhiệt độ hiện tại"""
 @app.route('/',methods=['GET'])
 def home():
-    last_record = db.child('DHT22').order_by_child("timestamp").limit_to_last(1).get().val()
-    for key,value in last_record.items():
+    # last_record = db.child('DHT22').order_by_child("timestamp").limit_to_last(1).get().val()
+    req = http.request('GET', 'https://doan-cloud.firebaseio.com/DHT22.json?orderBy="timestamp"&limitToLast=1')
+    data = json.loads(req.data.decode('utf-8'))
+    for key,value in data.items():
         return value
 
 
