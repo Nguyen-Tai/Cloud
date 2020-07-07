@@ -17,8 +17,7 @@ http = urllib3.PoolManager()
 """Trả về nhiệt độ hiện tại"""
 @app.route('/',methods=['GET'])
 def home():
-    # last_record = db.child('DHT22').order_by_child("timestamp").limit_to_last(1).get().val()
-    req = http.request('GET', 'https://doan-cloud.firebaseio.com/DHT22.json?orderBy="timestamp"&limitToLast=1')
+    req = http.request('GET', 'https://doan-cloud-9b784.firebaseio.com/DHT22.json?orderBy="timestamp"&limitToLast=1')
     data = json.loads(req.data.decode('utf-8'))
     for key,value in data.items():
         return value
@@ -28,8 +27,9 @@ def home():
 @app.route('/iot',methods=['GET'])
 def getNextFromCurrent():
     # start = time.time()
-    req = http.request('GET', 'https://doan-cloud.firebaseio.com/DHT22.json?orderBy="timestamp"')
+    req = http.request('GET', 'https://doan-cloud-9b784.firebaseio.com/DHT22.json?orderBy="timestamp"')
     data = json.loads(req.data.decode('utf-8'))
+    print(len(data))
     # print('time get data',time.time() - start)
     A,B,C,LastTemperature,LastHumidity = utils.nextTemperature(data)
     next_temperature = A*LastTemperature + B*LastHumidity+ C
@@ -39,7 +39,7 @@ def getNextFromCurrent():
 """Trả về nhiệt độ dự đoán tiếp theo dựa trên nhiệt độ đưa vào bởi người dùng """
 @app.route('/iot/<float:temperature>/<float:humidity>',methods=['GET'])
 def getNextFrom(temperature,humidity):
-    req = http.request('GET', 'https://doan-cloud.firebaseio.com/DHT22.json?orderBy="timestamp"')
+    req = http.request('GET', 'https://doan-cloud-9b784.firebaseio.com/DHT22.json?orderBy="timestamp"')
     data = json.loads(req.data.decode('utf-8'))
     A,B,C,LastTemperature,LastHumidity = utils.nextTemperature(data)
     next_temperature = A*temperature + B*humidity+ C
@@ -49,7 +49,7 @@ def getNextFrom(temperature,humidity):
 """Trả về nhiệt độ dự đoán sau 60' dựa trên nhiệt độ hiện tại"""
 @app.route('/iot/after60',methods=['GET'])
 def getAfterFromCurrent():
-    req = http.request('GET', 'https://doan-cloud.firebaseio.com/DHT22.json?orderBy="timestamp"')
+    req = http.request('GET', 'https://doan-cloud-9b784.firebaseio.com/DHT22.json?orderBy="timestamp"')
     data = json.loads(req.data.decode('utf-8'))
     A,B,C,LastTemperature,LastHumidity = utils.TemperatureAfterXSeconds(data)
     next_temperature = A*LastTemperature + B*LastHumidity + C 
@@ -59,7 +59,7 @@ def getAfterFromCurrent():
 """Trả về nhiệt độ dự đoán sau 60' dựa trên nhiệt độ hiện tại"""
 @app.route('/iot/after60/<float:temperature>/<float:humidity>',methods=['GET'])
 def getAfterFrom(temperature,humidity):
-    req = http.request('GET', 'https://doan-cloud.firebaseio.com/DHT22.json?orderBy="timestamp"')
+    req = http.request('GET', 'https://doan-cloud-9b784.firebaseio.com/DHT22.json?orderBy="timestamp"')
     data = json.loads(req.data.decode('utf-8'))
     A,B,C,LastTemperature,LastHumidity = utils.TemperatureAfterXSeconds(data)
     next_temperature = A*temperature + B*humidity + C 
