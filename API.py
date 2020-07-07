@@ -29,7 +29,7 @@ def getNextFromCurrent():
     # start = time.time()
     req = http.request('GET', 'https://doan-cloud-9b784.firebaseio.com/DHT22.json?orderBy="timestamp"')
     data = json.loads(req.data.decode('utf-8'))
-    print(len(data))
+    # print(len(data))
     # print('time get data',time.time() - start)
     A,B,C,LastTemperature,LastHumidity = utils.nextTemperature(data)
     next_temperature = A*LastTemperature + B*LastHumidity+ C
